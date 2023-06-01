@@ -1,4 +1,4 @@
-module github.com/shimmy8/hw-otus/tree/master/hw01_hello_otus
+module github.com/shimmy8/hw-otus/hw01_hello_otus
 
 go 1.19
 
