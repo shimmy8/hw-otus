@@ -20,10 +20,8 @@ func Unpack(inp string) (string, error) {
 			if repeats > 0 { // write only repeats > 0
 				outpBuilder.WriteString(strings.Repeat(prevStr, repeats))
 			}
-		} else { // current rune is not a number
-			if prevStr > "9" { // skip prevStr if it is a number
-				outpBuilder.WriteString(prevStr)
-			}
+		} else if prevStr > "9" { // current rune and prevStr are not numbers
+			outpBuilder.WriteString(prevStr)
 		}
 		prevStr = string(val)
 	}
