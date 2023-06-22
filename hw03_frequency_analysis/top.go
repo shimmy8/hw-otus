@@ -30,12 +30,7 @@ func Top10(input string) []string {
 			// skip words containing only symbols
 			continue
 		}
-		cnt, inMap := wordsCntMap[word]
-		if inMap {
-			wordsCntMap[word] = cnt + 1
-		} else {
-			wordsCntMap[word] = 1
-		}
+		wordsCntMap[word]++
 	}
 
 	// store counts to a slice of structs for further sorting
@@ -53,9 +48,9 @@ func Top10(input string) []string {
 
 	// store top words to the result slice
 	result := make([]string, 0, Limit)
-	for ind, wordsCnt := range wordsCntStructs {
+	for idx, wordsCnt := range wordsCntStructs {
 		result = append(result, wordsCnt.word)
-		if ind == Limit-1 {
+		if idx == Limit-1 {
 			break
 		}
 	}
