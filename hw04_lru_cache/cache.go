@@ -2,6 +2,11 @@ package hw04lrucache
 
 type Key string
 
+type CacheItem struct {
+	value interface{}
+	key   Key
+}
+
 type Cache interface {
 	Set(key Key, value interface{}) bool
 	Get(key Key) (interface{}, bool)
@@ -18,13 +23,16 @@ func (cache *lruCache) Set(key Key, i interface{}) bool {
 	cachedElem, inCache := cache.items[key]
 
 	if inCache {
-		cachedElem.Value = i
+		cachedElem.Value = CacheItem{value: i, key: key}
 		cache.queue.MoveToFront(cachedElem)
 	} else {
 		if cache.capacity == cache.queue.Len() {
-			cache.queue.Remove(cache.queue.Back())
+			queueBack := cache.queue.Back()
+			cacheKey := queueBack.Value.(CacheItem).key
+			cache.queue.Remove(queueBack)
+			delete(cache.items, cacheKey)
 		}
-		elem := cache.queue.PushFront(i)
+		elem := cache.queue.PushFront(CacheItem{value: i, key: key})
 		cache.items[key] = elem
 	}
 	return inCache
@@ -34,7 +42,7 @@ func (cache *lruCache) Get(key Key) (interface{}, bool) {
 	cachedElem, inCache := cache.items[key]
 	if inCache {
 		cache.queue.MoveToFront(cachedElem)
-		return cachedElem.Value, inCache
+		return cachedElem.Value.(CacheItem).value, inCache
 	}
 	return nil, inCache
 }
