@@ -17,70 +17,70 @@ type ListItem struct {
 }
 
 type list struct {
-	Length    int
-	FirstItem *ListItem
-	LastItem  *ListItem
+	length    int
+	firstItem *ListItem
+	lastItem  *ListItem
 }
 
 func (lst list) Len() int {
-	return lst.Length
+	return lst.length
 }
 
 func (lst list) Front() *ListItem {
-	return lst.FirstItem
+	return lst.firstItem
 }
 
 func (lst list) Back() *ListItem {
-	return lst.LastItem
+	return lst.lastItem
 }
 
 func (lst *list) PushFront(v interface{}) *ListItem {
 	listItem := ListItem{Value: v}
-	if lst.FirstItem == nil {
-		lst.FirstItem = &listItem
-		lst.LastItem = &listItem
+	if lst.firstItem == nil {
+		lst.firstItem = &listItem
+		lst.lastItem = &listItem
 	} else {
-		listItem.Next = lst.FirstItem
-		lst.FirstItem.Prev = &listItem
-		lst.FirstItem = &listItem
+		listItem.Next = lst.firstItem
+		lst.firstItem.Prev = &listItem
+		lst.firstItem = &listItem
 	}
-	lst.Length++
+	lst.length++
 	return &listItem
 }
 
 func (lst *list) PushBack(v interface{}) *ListItem {
 	listItem := ListItem{Value: v}
-	if lst.LastItem == nil { // lst is empty
-		lst.LastItem = &listItem
-		lst.FirstItem = &listItem
+	if lst.lastItem == nil { // lst is empty
+		lst.lastItem = &listItem
+		lst.firstItem = &listItem
 	} else {
-		listItem.Prev = lst.LastItem
-		lst.LastItem.Next = &listItem
-		lst.LastItem = &listItem
+		listItem.Prev = lst.lastItem
+		lst.lastItem.Next = &listItem
+		lst.lastItem = &listItem
 	}
-	lst.Length++
+	lst.length++
 	return &listItem
 }
 
 func (lst *list) Remove(i *ListItem) {
 	if i.Prev == nil {
-		lst.FirstItem = i.Next
+		lst.firstItem = i.Next
 	} else {
 		i.Prev.Next = i.Next
 	}
 
 	if i.Next == nil {
-		lst.LastItem = i.Prev
+		lst.lastItem = i.Prev
 	} else {
 		i.Next.Prev = i.Prev
 	}
 
-	lst.Length--
+	lst.length--
 	i = nil
 }
 
 func (lst *list) MoveToFront(i *ListItem) {
-	if lst.FirstItem == i {
+	if lst.firstItem == i {
 		return
 	}
 	if i.Prev != nil {
@@ -90,10 +90,10 @@ func (lst *list) MoveToFront(i *ListItem) {
 		i.Next.Prev = i.Prev
 	}
 
-	lst.FirstItem.Prev = i
-	i.Next = lst.FirstItem
+	lst.firstItem.Prev = i
+	i.Next = lst.firstItem
 	i.Prev = nil
-	lst.FirstItem = i
+	lst.firstItem = i
 }
 
 func NewList() List {

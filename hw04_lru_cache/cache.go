@@ -14,12 +14,12 @@ type lruCache struct {
 	items    map[Key]*ListItem
 }
 
-func (cache lruCache) Set(key Key, i interface{}) bool {
+func (cache *lruCache) Set(key Key, i interface{}) bool {
 	cachedElem, inCache := cache.items[key]
 
 	if inCache {
 		cachedElem.Value = i
-		cache.queue.PushFront(cachedElem)
+		cache.queue.MoveToFront(cachedElem)
 	} else {
 		if cache.capacity == cache.queue.Len() {
 			cache.queue.Remove(cache.queue.Back())
@@ -30,7 +30,7 @@ func (cache lruCache) Set(key Key, i interface{}) bool {
 	return inCache
 }
 
-func (cache lruCache) Get(key Key) (interface{}, bool) {
+func (cache *lruCache) Get(key Key) (interface{}, bool) {
 	cachedElem, inCache := cache.items[key]
 	if inCache {
 		cache.queue.MoveToFront(cachedElem)
