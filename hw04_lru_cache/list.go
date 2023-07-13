@@ -35,31 +35,31 @@ func (lst list) Back() *ListItem {
 }
 
 func (lst *list) PushFront(v interface{}) *ListItem {
-	listItem := ListItem{Value: v}
+	listItem := &ListItem{Value: v}
 	if lst.firstItem == nil {
-		lst.firstItem = &listItem
-		lst.lastItem = &listItem
+		lst.firstItem = listItem
+		lst.lastItem = listItem
 	} else {
 		listItem.Next = lst.firstItem
-		lst.firstItem.Prev = &listItem
-		lst.firstItem = &listItem
+		lst.firstItem.Prev = listItem
+		lst.firstItem = listItem
 	}
 	lst.length++
-	return &listItem
+	return listItem
 }
 
 func (lst *list) PushBack(v interface{}) *ListItem {
-	listItem := ListItem{Value: v}
+	listItem := &ListItem{Value: v}
 	if lst.lastItem == nil { // lst is empty
-		lst.lastItem = &listItem
-		lst.firstItem = &listItem
+		lst.lastItem = listItem
+		lst.firstItem = listItem
 	} else {
 		listItem.Prev = lst.lastItem
-		lst.lastItem.Next = &listItem
-		lst.lastItem = &listItem
+		lst.lastItem.Next = listItem
+		lst.lastItem = listItem
 	}
 	lst.length++
-	return &listItem
+	return listItem
 }
 
 func (lst *list) Remove(i *ListItem) {
@@ -83,8 +83,12 @@ func (lst *list) MoveToFront(i *ListItem) {
 	if lst.firstItem == i {
 		return
 	}
+
 	if i.Prev != nil {
 		i.Prev.Next = i.Next
+		if i.Next == nil { // i was a last item
+			lst.lastItem = i.Prev
+		}
 	}
 	if i.Next != nil {
 		i.Next.Prev = i.Prev
