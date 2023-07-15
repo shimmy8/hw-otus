@@ -22,15 +22,15 @@ type list struct {
 	lastItem  *ListItem
 }
 
-func (lst list) Len() int {
+func (lst *list) Len() int {
 	return lst.length
 }
 
-func (lst list) Front() *ListItem {
+func (lst *list) Front() *ListItem {
 	return lst.firstItem
 }
 
-func (lst list) Back() *ListItem {
+func (lst *list) Back() *ListItem {
 	return lst.lastItem
 }
 
