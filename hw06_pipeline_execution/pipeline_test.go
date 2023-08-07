@@ -123,5 +123,4 @@ func TestPipeline(t *testing.T) {
 
 		require.Equal(t, []string{"ABC", "ZABC", "CABC"}, result)
 	})
-
 }
