@@ -2,6 +2,7 @@ package hw06pipelineexecution
 
 import (
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -89,5 +90,37 @@ func TestPipeline(t *testing.T) {
 
 		require.Len(t, result, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
+	})
+
+	addStr := func(v interface{}, strToAdd string) interface{} {
+		var sb strings.Builder
+		sb.WriteString(v.(string))
+		sb.WriteString(strToAdd)
+		return sb.String()
+	}
+
+	stringStages := []Stage{
+		g("Add A", func(v interface{}) interface{} { return addStr(v, "A") }),
+		g("Add B", func(v interface{}) interface{} { return addStr(v, "B") }),
+		g("Add C", func(v interface{}) interface{} { return addStr(v, "C") }),
+	}
+
+	t.Run("strings stage order case", func(t *testing.T) {
+		in := make(Bi)
+		data := []string{"", "Z", "C"}
+
+		go func() {
+			for _, v := range data {
+				in <- v
+			}
+			close(in)
+		}()
+
+		result := make([]string, 0, 3)
+		for s := range ExecutePipeline(in, nil, stringStages...) {
+			result = append(result, s.(string))
+		}
+
+		require.Equal(t, []string{"ABC", "ZABC", "CABC"}, result)
 	})
 }
