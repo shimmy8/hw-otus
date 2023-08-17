@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -22,7 +23,7 @@ func (pb *ProgressBar) Print(curr int64) {
 	prevPercent := pb.percent
 	pb.percent = pb.getPercent()
 	if pb.percent != prevPercent {
-		pb.rate = strings.Repeat("#", int(pb.percent/2))
+		pb.rate = strings.Repeat("#", pb.percent/2)
 	}
 	fmt.Printf("\rCopy [%-50s]%3d%% %8d/%d", pb.rate, pb.percent, pb.curr, pb.total)
 	if pb.curr == pb.total {
@@ -53,7 +54,7 @@ func copyNWithProgress(dst io.Writer, src io.Reader, nTotal int64) (int64, error
 		copied += n
 		progreesBar.Print(copied)
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				break
 			}
 			return copied, err

@@ -33,7 +33,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 	defer inpFile.Close()
 
-	outpFile, err := os.Create(to)
+	outpFile, err := os.Create(toPath)
 	if err != nil {
 		return err
 	}

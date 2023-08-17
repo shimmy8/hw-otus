@@ -10,8 +10,7 @@ import (
 func TestCopy(t *testing.T) {
 	t.Run("Test input file not found", func(t *testing.T) {
 		err := Copy("./testdata/123.txt", "/tmp/123.txt", 100, 10)
-		_, ok := err.(*os.PathError)
-		require.True(t, ok)
+		require.ErrorIs(t, err, os.ErrNotExist)
 	})
 
 	t.Run("Test unsupported file error", func(t *testing.T) {
