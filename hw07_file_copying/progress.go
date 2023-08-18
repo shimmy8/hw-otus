@@ -12,11 +12,11 @@ type ProgressBar struct {
 	rate    string
 }
 
-func NewProgressBar(total int64) (*ProgressBar, error) {
+func NewProgressBar(total int64) *ProgressBar {
 	pb := &ProgressBar{
 		total: total,
 	}
-	return pb, nil
+	return pb
 }
 
 func (pb *ProgressBar) Print(curr int64) {
