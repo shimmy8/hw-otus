@@ -14,7 +14,7 @@ var (
 func copyNWithProgress(dst io.Writer, src io.Reader, nTotal int64) (int64, error) {
 	var copied int64
 
-	chunkSize := nTotal / 100
+	var chunkSize int64 = 16
 	progreesBar := NewProgressBar(nTotal)
 
 	for {
