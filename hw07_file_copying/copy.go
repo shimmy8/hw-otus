@@ -11,6 +11,36 @@ var (
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 )
 
+func copyNWithProgress(dst io.Writer, src io.Reader, nTotal int64) (int64, error) {
+	var copied int64
+
+	var chunkSize int64 = nTotal / 100
+	progreesBar, err := NewProgressBar(nTotal)
+	if err != nil {
+		return 0, err
+	}
+	for {
+		remain := nTotal - copied
+		if remain == 0 {
+			break
+		}
+		if remain < chunkSize {
+			chunkSize = remain
+		}
+
+		n, err := io.CopyN(dst, src, chunkSize)
+		copied += n
+		progreesBar.Print(copied)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return copied, err
+		}
+	}
+	return copied, nil
+}
+
 func Copy(fromPath, toPath string, offset, limit int64) error {
 	// get file info
 	fileInfo, err := os.Stat(fromPath)

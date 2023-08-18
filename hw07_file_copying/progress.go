@@ -1,9 +1,7 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"strings"
 )
 
@@ -14,8 +12,11 @@ type ProgressBar struct {
 	rate    string
 }
 
-func (pb *ProgressBar) New(total int64) {
-	pb.total = total
+func NewProgressBar(total int64) (*ProgressBar, error) {
+	pb := &ProgressBar{
+		total: total,
+	}
+	return pb, nil
 }
 
 func (pb *ProgressBar) Print(curr int64) {
@@ -33,32 +34,4 @@ func (pb *ProgressBar) Print(curr int64) {
 
 func (pb *ProgressBar) getPercent() int {
 	return int((float32(pb.curr) / float32(pb.total)) * 100)
-}
-
-func copyNWithProgress(dst io.Writer, src io.Reader, nTotal int64) (int64, error) {
-	var copied int64
-
-	var chunkSize int64 = 16
-	var progreesBar ProgressBar
-	progreesBar.New(nTotal)
-	for {
-		remain := nTotal - copied
-		if remain == 0 {
-			break
-		}
-		if remain < chunkSize {
-			chunkSize = remain
-		}
-
-		n, err := io.CopyN(dst, src, chunkSize)
-		copied += n
-		progreesBar.Print(copied)
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			return copied, err
-		}
-	}
-	return copied, nil
 }
