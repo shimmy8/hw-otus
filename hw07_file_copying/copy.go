@@ -11,34 +11,6 @@ var (
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 )
 
-func copyNWithProgress(dst io.Writer, src io.Reader, nTotal int64) (int64, error) {
-	var copied int64
-
-	var chunkSize int64 = 16
-	progreesBar := NewProgressBar(nTotal)
-
-	for {
-		remain := nTotal - copied
-		if remain == 0 {
-			break
-		}
-		if remain < chunkSize {
-			chunkSize = remain
-		}
-
-		n, err := io.CopyN(dst, src, chunkSize)
-		copied += n
-		progreesBar.Print(copied)
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			return copied, err
-		}
-	}
-	return copied, nil
-}
-
 func Copy(fromPath, toPath string, offset, limit int64) error {
 	// get file info
 	fileInfo, err := os.Stat(fromPath)
@@ -67,10 +39,9 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 	defer outpFile.Close()
 
-	numRemainFileBytes := fileSize - offset
-	// set limit to remain filesize
-	if limit == 0 || limit > numRemainFileBytes {
-		limit = numRemainFileBytes
+	numBytesToCopy := fileSize - offset
+	if limit > 0 && limit < numBytesToCopy {
+		numBytesToCopy = limit
 	}
 
 	// seek to offset
@@ -81,7 +52,12 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	writer := io.WriteCloser(outpFile)
 	defer writer.Close()
 
-	_, copyErr := copyNWithProgress(writer, reader, limit)
+	progressBar := NewProgressBar(numBytesToCopy * 2)
+	_, copyErr := io.CopyN(
+		NewProgressWriter(writer, progressBar),
+		NewProgressReader(reader, progressBar),
+		numBytesToCopy,
+	)
 	if copyErr != nil {
 		return copyErr
 	}
