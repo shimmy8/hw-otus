@@ -52,6 +52,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	writer := io.WriteCloser(outpFile)
 	defer writer.Close()
 
+	// *2 to show progress for both reading and writing
 	progressBar := NewProgressBar(numBytesToCopy * 2)
 	_, copyErr := io.CopyN(
 		NewProgressWriter(writer, progressBar),
