@@ -41,4 +41,22 @@ func TestRunCmd(t *testing.T) {
 
 		require.Equal(t, "", string(actualValue))
 	})
+
+	t.Run("Test overwrite env var", func(t *testing.T) {
+		testFilename := "./testdata/test_env_rm.txt"
+		defer os.Remove(testFilename)
+
+		os.Setenv("WRITEMEOVER", "I shall not be here")
+		cmd := []string{"/bin/bash", "-c", "echo -n \"$WRITEMEOVER\" > " + testFilename}
+
+		exptectedValue := "my brand new value"
+		env := Environment{
+			"WRITEMEOVER": EnvValue{Value: exptectedValue, NeedRemove: false},
+		}
+		RunCmd(cmd, env)
+
+		actualValue, _ := os.ReadFile(testFilename)
+
+		require.Equal(t, exptectedValue, string(actualValue))
+	})
 }

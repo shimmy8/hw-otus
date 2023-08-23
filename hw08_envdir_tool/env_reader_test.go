@@ -28,13 +28,19 @@ func TestReadDir(t *testing.T) {
 		require.Equal(t, expectedEnv, env)
 	})
 
-	t.Run("Test env name trim", func(t *testing.T) {
-		env, err := ReadDir("./testdata/env2")
+	t.Run("Test env file = error", func(t *testing.T) {
+		_, err := ReadDir("./testdata/env2")
+
+		require.ErrorIs(t, err, ErrFileName)
+	})
+
+	t.Run("Test env val trim tab", func(t *testing.T) {
+		env, err := ReadDir("./testdata/env3")
 
 		require.NoError(t, err)
 
 		expectedEnv := Environment{
-			"TRIMME": EnvValue{Value: "AND MY TAB", NeedRemove: false},
+			"TRIMMYTAB": EnvValue{Value: "HERE IT IS", NeedRemove: false},
 		}
 		require.Equal(t, expectedEnv, env)
 	})

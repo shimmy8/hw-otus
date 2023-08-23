@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,6 +14,8 @@ type EnvValue struct {
 	Value      string
 	NeedRemove bool
 }
+
+var ErrFileName = errors.New("env file name error")
 
 // ReadDir reads a specified directory and returns map of env variables.
 // Variables represented as files where filename is name of variable, file first line is a value.
@@ -28,15 +30,17 @@ func ReadDir(dir string) (Environment, error) {
 		if err != nil {
 			return env, err
 		}
-		cleanName := strings.Trim(file.Name(), "=")
+		if strings.Contains(file.Name(), "=") {
+			return nil, ErrFileName
+		}
 		cleanValue := cleanValue(value)
-		env[cleanName] = EnvValue{Value: cleanValue, NeedRemove: len(cleanValue) == 0}
+		env[file.Name()] = EnvValue{Value: cleanValue, NeedRemove: len(cleanValue) == 0}
 	}
 	return env, nil
 }
 
 func cleanValue(inp []byte) string {
 	value := strings.Split(string(inp), "\n")[0]
-	value = string(bytes.ReplaceAll([]byte(value), []byte{0x00}, []byte("\n")))
+	value = strings.ReplaceAll(value, "\x00", "\n")
 	return strings.TrimRight(value, " \t")
 }
