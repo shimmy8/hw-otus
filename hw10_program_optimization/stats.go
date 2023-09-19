@@ -1,21 +1,23 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
 	"io"
 	"regexp"
 	"strings"
+
+	easyjson "github.com/mailru/easyjson"
 )
 
 type User struct {
-	ID       int
-	Name     string
-	Username string
-	Email    string
-	Phone    string
-	Password string
-	Address  string
+	ID       int    `json:"ID"`       //nolint:tagliatelle
+	Name     string `json:"Name"`     //nolint:tagliatelle
+	Username string `json:"Username"` //nolint:tagliatelle
+	Email    string `json:"Email"`    //nolint:tagliatelle
+	Phone    string `json:"Phone"`    //nolint:tagliatelle
+	Password string `json:"Password"` //nolint:tagliatelle
+	Address  string `json:"Address"`  //nolint:tagliatelle
 }
 
 type DomainStat map[string]int
@@ -31,35 +33,40 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 type users [100_000]User
 
 func getUsers(r io.Reader) (result users, err error) {
-	content, err := io.ReadAll(r)
-	if err != nil {
-		return
-	}
+	reader := bufio.NewReader(r)
+	i := 0
+	for {
+		line, readErr := reader.ReadBytes('\n')
+		if readErr != nil && readErr != io.EOF {
+			return result, err
+		}
 
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
 		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
-			return
+		if err := easyjson.Unmarshal(line, &user); err != nil {
+			return result, err
 		}
 		result[i] = user
+		i++
+
+		if readErr == io.EOF {
+			return result, nil
+		}
 	}
-	return
 }
 
 func countDomains(u users, domain string) (DomainStat, error) {
 	result := make(DomainStat)
 
-	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
-		if err != nil {
-			return nil, err
-		}
+	domainRegexp, err := regexp.Compile(".+@(.+\\." + domain + ")$")
+	if err != nil {
+		return nil, err
+	}
 
-		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
-			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+	for _, user := range u {
+		found := domainRegexp.FindStringSubmatch(user.Email)
+		if len(found) > 0 {
+			fullDomain := strings.ToLower(found[1])
+			result[fullDomain]++
 		}
 	}
 	return result, nil
