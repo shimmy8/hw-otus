@@ -1,0 +1,12 @@
+BenchmarkStats-8   	  499527	      2082 ns/op	    7097 B/op	      30 allocs/op
+BenchmarkStats-8   	  500644	      2265 ns/op	    7097 B/op	      30 allocs/op
+BenchmarkStats-8   	  498494	      2157 ns/op	    7097 B/op	      30 allocs/op
+BenchmarkStats-8   	  556916	      2087 ns/op	    7097 B/op	      30 allocs/op
+BenchmarkStats-8   	  494736	      2151 ns/op	    7097 B/op	      30 allocs/op
+BenchmarkStats-8   	  461911	      2182 ns/op	    7097 B/op	      30 allocs/op
+BenchmarkStats-8   	  559503	      2062 ns/op	    7097 B/op	      30 allocs/op
+BenchmarkStats-8   	  491270	      2147 ns/op	    7097 B/op	      30 allocs/op
+BenchmarkStats-8   	  559904	      2064 ns/op	    7097 B/op	      30 allocs/op
+BenchmarkStats-8   	  502854	      2093 ns/op	    7097 B/op	      30 allocs/op
+PASS
+ok  	github.com/shimmy8/hw-otus/hw10_program_optimization	56.654s
