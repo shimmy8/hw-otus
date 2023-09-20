@@ -1,66 +1,49 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
-	"fmt"
+	"bufio"
 	"io"
 	"regexp"
 	"strings"
+
+	easyjson "github.com/mailru/easyjson"
 )
 
 type User struct {
-	ID       int
-	Name     string
-	Username string
-	Email    string
-	Phone    string
-	Password string
-	Address  string
+	ID       int    `json:"ID"`       //nolint:tagliatelle
+	Name     string `json:"Name"`     //nolint:tagliatelle
+	Username string `json:"Username"` //nolint:tagliatelle
+	Email    string `json:"Email"`    //nolint:tagliatelle
+	Phone    string `json:"Phone"`    //nolint:tagliatelle
+	Password string `json:"Password"` //nolint:tagliatelle
+	Address  string `json:"Address"`  //nolint:tagliatelle
 }
 
 type DomainStat map[string]int
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	u, err := getUsers(r)
-	if err != nil {
-		return nil, fmt.Errorf("get users error: %w", err)
-	}
-	return countDomains(u, domain)
-}
-
-type users [100_000]User
-
-func getUsers(r io.Reader) (result users, err error) {
-	content, err := io.ReadAll(r)
-	if err != nil {
-		return
-	}
-
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
-		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
-			return
-		}
-		result[i] = user
-	}
-	return
-}
-
-func countDomains(u users, domain string) (DomainStat, error) {
 	result := make(DomainStat)
+	scanner := bufio.NewScanner(r)
 
-	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
-		if err != nil {
-			return nil, err
+	var user User
+
+	domainRegexp, err := regexp.Compile(".+@(.+\\." + domain + ")$")
+	if err != nil {
+		return result, err
+	}
+
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		if err := easyjson.Unmarshal(line, &user); err != nil {
+			return result, err
 		}
 
-		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
-			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
+		submatch := domainRegexp.MatchString(user.Email)
+		if submatch {
+			fullDomain := strings.ToLower(strings.Split(user.Email, "@")[1])
+			result[fullDomain]++
 		}
 	}
+
 	return result, nil
 }
