@@ -38,9 +38,9 @@ func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 			return result, err
 		}
 
-		submatch := domainRegexp.FindStringSubmatch(user.Email)
-		if len(submatch) > 0 {
-			fullDomain := strings.ToLower(submatch[1])
+		submatch := domainRegexp.MatchString(user.Email)
+		if submatch {
+			fullDomain := strings.ToLower(strings.Split(user.Email, "@")[1])
 			result[fullDomain]++
 		}
 	}
