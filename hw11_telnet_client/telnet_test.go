@@ -74,5 +74,4 @@ func TestTelnetClient(t *testing.T) {
 		require.ErrorAs(t, err, &netErr)
 		require.Equal(t, err.Error(), "dial tcp 127.0.0.1:111: connect: connection refused")
 	})
-
 }

@@ -17,7 +17,7 @@ func main() {
 
 	args := flag.Args()
 	if len(args) != 2 {
-		fmt.Fprintln(os.Stderr, errors.New("invalid agruments, must specify host and port"))
+		fmt.Fprintln(os.Stderr, errors.New("invalid arguments, must specify host and port"))
 		os.Exit(1)
 	}
 
