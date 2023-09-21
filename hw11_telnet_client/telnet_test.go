@@ -62,4 +62,17 @@ func TestTelnetClient(t *testing.T) {
 
 		wg.Wait()
 	})
+
+	t.Run("err connection refused", func(t *testing.T) {
+		in := &bytes.Buffer{}
+		out := &bytes.Buffer{}
+		timeout, _ := time.ParseDuration("10s")
+
+		var netErr net.Error
+		client := NewTelnetClient("localhost:111", timeout, io.NopCloser(in), out)
+		err := client.Connect()
+		require.ErrorAs(t, err, &netErr)
+		require.Equal(t, err.Error(), "dial tcp 127.0.0.1:111: connect: connection refused")
+	})
+
 }
