@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"sync"
+	"syscall"
 	"testing"
 	"time"
 
@@ -61,5 +62,15 @@ func TestTelnetClient(t *testing.T) {
 		}()
 
 		wg.Wait()
+	})
+
+	t.Run("err connection refused", func(t *testing.T) {
+		in := &bytes.Buffer{}
+		out := &bytes.Buffer{}
+		timeout, _ := time.ParseDuration("10s")
+
+		client := NewTelnetClient("localhost:111", timeout, io.NopCloser(in), out)
+		err := client.Connect()
+		require.ErrorIs(t, err, syscall.ECONNREFUSED)
 	})
 }
