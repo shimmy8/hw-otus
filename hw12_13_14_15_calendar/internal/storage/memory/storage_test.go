@@ -22,10 +22,11 @@ func createNewEvent(id string) *storage.Event {
 }
 
 func TestStorage(t *testing.T) {
-	s := New()
 
 	t.Run("test add event", func(t *testing.T) {
 		t.Parallel()
+		s := New()
+
 		e := createNewEvent("123")
 		err := s.CreateEvent(e)
 
@@ -39,6 +40,8 @@ func TestStorage(t *testing.T) {
 
 	t.Run("test update event", func(t *testing.T) {
 		t.Parallel()
+		s := New()
+
 		e := createNewEvent("123")
 		_ = s.CreateEvent(e)
 
@@ -56,6 +59,8 @@ func TestStorage(t *testing.T) {
 
 	t.Run("test delete event", func(t *testing.T) {
 		t.Parallel()
+		s := New()
+
 		e := createNewEvent("123")
 		_ = s.CreateEvent(e)
 
@@ -68,6 +73,24 @@ func TestStorage(t *testing.T) {
 
 	t.Run("test already created err", func(t *testing.T) {
 		t.Parallel()
+		s := New()
+
+		e := createNewEvent("123")
+		_ = s.CreateEvent(e)
+
+		e1 := createNewEvent("123")
+		// override dates to avoid ErrDateBusy
+		e1.StartDT = time.Now().Add(-2 * time.Hour)
+		e1.EndDT = time.Now().Add(-1 * time.Hour)
+
+		err := s.CreateEvent(e1)
+		require.ErrorIs(t, err, storage.ErrEventAlreadyCreated)
+	})
+
+	t.Run("test date busy err", func(t *testing.T) {
+		t.Parallel()
+		s := New()
+
 		e := createNewEvent("123")
 		_ = s.CreateEvent(e)
 
@@ -76,18 +99,10 @@ func TestStorage(t *testing.T) {
 		require.ErrorIs(t, err, storage.ErrDateBusy)
 	})
 
-	t.Run("test date busy err", func(t *testing.T) {
-		t.Parallel()
-		e := createNewEvent("123")
-		_ = s.CreateEvent(e)
-
-		e1 := createNewEvent("123")
-		err := s.CreateEvent(e1)
-		require.ErrorIs(t, err, storage.ErrEventAlreadyCreated)
-	})
-
 	t.Run("test get events in interval", func(t *testing.T) {
 		t.Parallel()
+		s := New()
+
 		now := time.Now()
 
 		e1 := createNewEvent("e1")
