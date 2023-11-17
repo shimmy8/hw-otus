@@ -22,7 +22,6 @@ func createNewEvent(id string) *storage.Event {
 }
 
 func TestStorage(t *testing.T) {
-
 	t.Run("test add event", func(t *testing.T) {
 		t.Parallel()
 		s := New()
