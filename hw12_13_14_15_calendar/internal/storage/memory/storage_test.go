@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func createNewEvent(ID string) *storage.Event {
+func createNewEvent(id string) *storage.Event {
 	return &storage.Event{
-		ID:           ID,
+		ID:           id,
 		Title:        "",
 		StartDT:      time.Now().Add(-24 * time.Hour),
 		EndDT:        time.Now().Add(-23 * time.Hour),

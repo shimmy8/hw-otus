@@ -8,6 +8,17 @@ linters-settings:
   funlen:
     lines: 150
     statements: 80
+  depguard:
+    rules:
+      main:
+        allow:
+          - $gostd
+          - github.com/shimmy8/hw-otus/hw12_13_14_15_calendar
+          - github.com/pressly/goose/v3
+          - github.com/stretchr/testify/require
+          - github.com/jmoiron/sqlx
+          - github.com/spf13/viper
+          - github.com/jackc/pgx/stdlib
 
 issues:
   exclude-rules:

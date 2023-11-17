@@ -67,8 +67,8 @@ func (s *Storage) checkDateBusy(startDT time.Time, endDT time.Time, userID strin
 	return len(dateEvents) > 0
 }
 
-func (s *Storage) GetEvent(ID string) (*storage.Event, error) {
-	value, ok := s.events.Load(ID)
+func (s *Storage) GetEvent(id string) (*storage.Event, error) {
+	value, ok := s.events.Load(id)
 	if !ok {
 		return nil, storage.ErrEventNotFoud
 	}
@@ -77,18 +77,18 @@ func (s *Storage) GetEvent(ID string) (*storage.Event, error) {
 	return event, nil
 }
 
-func (s *Storage) UpdateEvent(ID string, e *storage.Event) error {
-	_, loaded := s.events.Load(ID)
+func (s *Storage) UpdateEvent(id string, e *storage.Event) error {
+	_, loaded := s.events.Load(id)
 	if !loaded {
 		return storage.ErrEventNotFoud
 	}
 
-	s.events.Store(ID, e)
+	s.events.Store(id, e)
 
 	return nil
 }
 
-func (s *Storage) DeleteEvent(ID string) error {
-	s.events.Delete(ID)
+func (s *Storage) DeleteEvent(id string) error {
+	s.events.Delete(id)
 	return nil
 }

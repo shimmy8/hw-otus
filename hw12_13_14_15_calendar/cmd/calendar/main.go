@@ -40,7 +40,7 @@ func main() {
 	case "in-memory":
 		storage = memorystorage.New()
 	case "db":
-		storage = sqlstorage.New(ctx, config.Storage.URL)
+		storage = sqlstorage.New(ctx, config.Storage.URL, config.Storage.Timeout)
 	default:
 		storage = memorystorage.New()
 	}
@@ -65,6 +65,6 @@ func main() {
 	if err := server.Start(ctx, config.HTTPServer.Host, config.HTTPServer.Port); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic
 	}
 }

@@ -12,7 +12,7 @@ func init() {
 }
 
 func Up(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.Exec(`
+	_, err := tx.ExecContext(ctx, `
 		CREATE TABLE events
 		(
 			id            bpchar      NOT NULL,
@@ -33,7 +33,7 @@ func Up(ctx context.Context, tx *sql.Tx) error {
 }
 
 func Down(ctx context.Context, tx *sql.Tx) error {
-	_, err := tx.Exec("DROP TABLE events")
+	_, err := tx.ExecContext(ctx, "DROP TABLE events")
 	if err != nil {
 		return err
 	}

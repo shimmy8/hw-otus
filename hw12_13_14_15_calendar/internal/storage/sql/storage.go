@@ -2,33 +2,40 @@ package sqlstorage
 
 import (
 	"context"
-	"log"
 	"time"
 
+	// use pgx as driver.
+	_ "github.com/jackc/pgx/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Storage struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
-func New(ctx context.Context, dbURL string) *Storage {
+func New(ctx context.Context, dbURL string, timeout int) *Storage {
 	storage := &Storage{}
-	storage.Connect(ctx, dbURL)
+
+	timeoutCtx, cancel := context.WithTimeout(ctx, time.Second*time.Duration(timeout))
+	storage.ctx = timeoutCtx
+	storage.cancel = cancel
+
+	storage.Connect(dbURL)
 	return storage
 }
 
-func (s *Storage) Connect(ctx context.Context, dbURL string) error {
-	db, err := sqlx.Connect("postgres", dbURL)
-	if err != nil {
-		log.Fatalln(err)
-	}
+func (s *Storage) Connect(dbURL string) error {
+	db := sqlx.MustConnect("pgx", dbURL)
+
 	s.db = db
 	return nil
 }
 
-func (s *Storage) Close(ctx context.Context) error {
+func (s *Storage) Close() error {
+	s.cancel()
 	err := s.db.Close()
 	return err
 }
@@ -60,7 +67,6 @@ func (s *Storage) GetEventsForInterval(startDt time.Time, endDt time.Time, userI
 			(end_dt <= $1 AND end_dt >= $2)
 		)
 	`, startDt, endDt, userID)
-
 	if err != nil {
 		return events, err
 	}
@@ -81,13 +87,13 @@ func (s *Storage) checkDateBusy(startDT time.Time, endDT time.Time, userID strin
 	return len(events) > 0
 }
 
-func (s *Storage) GetEvent(ID string) (*storage.Event, error) {
+func (s *Storage) GetEvent(id string) (*storage.Event, error) {
 	event := &storage.Event{}
-	err := s.db.Get(event, "SELECT * FROM events WHERE id=$1", ID)
+	err := s.db.Get(event, "SELECT * FROM events WHERE id=$1", id)
 	return event, err
 }
 
-func (s *Storage) UpdateEvent(ID string, e *storage.Event) error {
+func (s *Storage) UpdateEvent(_ string, e *storage.Event) error {
 	busy := s.checkDateBusy(e.StartDT, e.EndDT, e.UserID)
 	if busy {
 		return storage.ErrDateBusy
@@ -104,12 +110,11 @@ func (s *Storage) UpdateEvent(ID string, e *storage.Event) error {
 	) WHERE id=:id`, e)
 	err := tx.Commit()
 	return err
-
 }
 
-func (s *Storage) DeleteEvent(ID string) error {
+func (s *Storage) DeleteEvent(id string) error {
 	tx := s.db.MustBegin()
-	tx.MustExec(`DELETE FROM events WHERE id=$1`, ID)
+	tx.MustExec(`DELETE FROM events WHERE id=$1`, id)
 	err := tx.Commit()
 	return err
 }

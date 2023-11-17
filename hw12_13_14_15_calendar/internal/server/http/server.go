@@ -2,8 +2,10 @@ package internalhttp
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type Server struct {
@@ -33,8 +35,17 @@ func (s *Server) Start(ctx context.Context, host string, port int) error {
 
 	addr := host + ":" + strconv.Itoa(port)
 
+	server := &http.Server{
+		Addr:              addr,
+		Handler:           mux,
+		ReadHeaderTimeout: 3 * time.Second,
+		BaseContext: func(net.Listener) context.Context {
+			return ctx
+		},
+	}
+
 	s.logger.Info("Starting HTTP server at " + addr)
-	err := http.ListenAndServe(addr, mux)
+	err := server.ListenAndServe()
 	return err
 }
 
@@ -46,6 +57,6 @@ func (s *Server) Stop(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
 }
 
-func (s *Server) Hello(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Hello(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("hello-world"))
 }

@@ -3,6 +3,7 @@ level = "INFO"
 
 [storage]
 db = "in-memory"
+timeout = 3
 
 [httpserver]
 host = "localhost"

@@ -21,8 +21,9 @@ type LoggerConf struct {
 }
 
 type StorageConf struct {
-	DB  string `mapstructure:"db"`
-	URL string `mapstructure:"url"`
+	DB      string `mapstructure:"db"`
+	URL     string `mapstructure:"url"`
+	Timeout int    `mapstructure:"timeout"`
 }
 
 type HTTPServerConf struct {
@@ -38,9 +39,6 @@ func NewConfig(fileName string) Config {
 		fmt.Printf("Can't load config file")
 		os.Exit(1)
 	}
-
-	fmt.Println(v.AllKeys())
-	fmt.Println(v.AllSettings())
 
 	var c Config
 	if err := v.Unmarshal(&c); err != nil {
