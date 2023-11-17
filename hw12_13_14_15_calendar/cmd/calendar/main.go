@@ -12,6 +12,7 @@ import (
 	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -28,17 +29,25 @@ func main() {
 		return
 	}
 
-	config := NewConfig(configFile)
-	logg := logger.New(config.Logger.Level, "server")
-
-	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
-
-	server := internalhttp.NewServer(logg, calendar)
-
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
+
+	config := NewConfig(configFile)
+
+	var storage app.Storage
+
+	switch config.Storage.DB {
+	case "in-memory":
+		storage = memorystorage.New()
+	case "db":
+		storage = sqlstorage.New(ctx, config.Storage.URL)
+	default:
+		storage = memorystorage.New()
+	}
+
+	logg := logger.New(config.Logger.Level, "server")
+	calendar := app.New(logg, storage)
+	server := internalhttp.NewServer(logg, calendar)
 
 	go func() {
 		<-ctx.Done()
@@ -53,9 +62,9 @@ func main() {
 
 	logg.Info("calendar is running...")
 
-	if err := server.Start(ctx); err != nil {
+	if err := server.Start(ctx, config.HTTPServer.Host, config.HTTPServer.Port); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
-		os.Exit(1) //nolint:gocritic
+		os.Exit(1)
 	}
 }

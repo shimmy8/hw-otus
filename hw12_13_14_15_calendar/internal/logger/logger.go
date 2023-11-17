@@ -2,6 +2,7 @@ package logger
 
 import (
 	"log"
+	"time"
 )
 
 const (
@@ -31,26 +32,30 @@ func New(level string, name string) *Logger {
 	return &Logger{level: level, name: name}
 }
 
+func (l Logger) writeMsg(msg string) {
+	log.Printf("[%s] %s: %s", time.Now().Format(time.RFC822), l.level, msg)
+}
+
 func (l Logger) Info(msg string) {
 	if logLevelAllowed(l.level, info) {
-		log.Println(msg)
+		l.writeMsg(msg)
 	}
 }
 
 func (l Logger) Error(msg string) {
 	if logLevelAllowed(l.level, err) {
-		log.Println(msg)
+		l.writeMsg(msg)
 	}
 }
 
 func (l Logger) Debug(msg string) {
 	if logLevelAllowed(l.level, debug) {
-		log.Println(msg)
+		l.writeMsg(msg)
 	}
 }
 
 func (l Logger) Warn(msg string) {
 	if logLevelAllowed(l.level, warn) {
-		log.Println(msg)
+		l.writeMsg(msg)
 	}
 }

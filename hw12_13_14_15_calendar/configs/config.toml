@@ -3,3 +3,7 @@ level = "INFO"
 
 [storage]
 db = "in-memory"
+
+[httpserver]
+host = "localhost"
+port = 8080

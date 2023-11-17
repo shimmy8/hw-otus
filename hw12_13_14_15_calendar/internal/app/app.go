@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage"
 )
@@ -20,8 +21,9 @@ type Logger interface {
 
 type Storage interface {
 	GetEvent(ID string) (*storage.Event, error)
+	GetEventsForInterval(startDt time.Time, endDt time.Time, userID string) ([]*storage.Event, error)
 	CreateEvent(e *storage.Event) error
-	UpdateEvent(e *storage.Event) error
+	UpdateEvent(ID string, e *storage.Event) error
 	DeleteEvent(ID string) error
 }
 
