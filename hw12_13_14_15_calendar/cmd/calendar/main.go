@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/app"
+	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/config"
 	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage/memory"
@@ -32,7 +33,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
-	config := NewConfig(configFile)
+	config := config.NewConfig(configFile)
 
 	var storage app.Storage
 

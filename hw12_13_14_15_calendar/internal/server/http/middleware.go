@@ -29,6 +29,7 @@ func loggingMiddleware(h http.Handler, logger Logger) http.Handler {
 
 		var msgBuilder strings.Builder
 		for _, part := range []string{
+			r.RemoteAddr,
 			r.Method,
 			r.URL.String(),
 			r.Proto,
