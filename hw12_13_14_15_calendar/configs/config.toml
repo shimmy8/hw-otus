@@ -1,5 +1,10 @@
 [logger]
 level = "INFO"
 
-# TODO
-# ...
+[storage]
+db = "in-memory"
+timeout = 3
+
+[httpserver]
+host = "localhost"
+port = 8080
