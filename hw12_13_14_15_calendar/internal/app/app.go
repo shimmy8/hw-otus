@@ -86,11 +86,7 @@ func (a *App) UpdateEvent(
 }
 
 func (a *App) DeleteEvent(_ context.Context, eventID string) error {
-	if err := a.storage.DeleteEvent(eventID); err != nil {
-		return err
-	}
-
-	return nil
+	return a.storage.DeleteEvent(eventID)
 }
 
 func (a *App) ListEventsForDay(_ context.Context, userID string, startDt time.Time) ([]*storage.Event, error) {
