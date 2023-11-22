@@ -1,7 +1,59 @@
 syntax = "proto3";
 
 package event;
+option go_package = "./;gen";
+
+service EventService {
+    rpc CreateEvent(CreateEventRequest) returns (CreateEventReply);
+    rpc UpdateEvent(Event) returns (UpdateEventReply);
+    rpc DeleteEvent(DeleteEventRequest) returns (DeleteEventReply);
+
+    rpc ListEventsForDay(ListEventsRequest) returns (ListEventsReply);
+    rpc ListEventsForWeek(ListEventsRequest) returns (ListEventsReply);
+    rpc ListEventsForMonth(ListEventsRequest) returns (ListEventsReply);
+}
+
+
+message CreateEventRequest {
+    string title = 1;
+    string start_dt = 2;
+    string end_dt = 3;
+    string description = 4;
+    string user_id = 5;
+    string notify_before = 6;
+}
+
+message CreateEventReply {
+    string event_id = 1;
+}
+
+message UpdateEventReply {
+    bool ok = 1;
+}
+
+message DeleteEventRequest {
+    string event_id = 1;
+}
+
+message DeleteEventReply {
+    bool ok = 1;
+}
+
+message ListEventsRequest {
+    string start_dt = 1;
+    string user_id = 2;
+}
 
 message Event {
-    // TODO
+    string id = 1;
+    string title = 2;
+    string start_dt = 3;
+    string end_dt = 4;
+    string description = 5;
+    string user_id = 6;
+    string notify_before = 7;
+}
+
+message ListEventsReply {
+    repeated Event events = 1;
 }

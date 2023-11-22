@@ -8,3 +8,7 @@ timeout = 3
 [httpserver]
 host = "localhost"
 port = 8080
+
+[grpcserver]
+host = "localhost"
+port = 8002
