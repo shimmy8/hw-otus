@@ -19,6 +19,7 @@ linters-settings:
           - github.com/jmoiron/sqlx
           - github.com/spf13/viper
           - github.com/jackc/pgx/stdlib
+          - github.com/google/uuid
 
 issues:
   exclude-rules:
