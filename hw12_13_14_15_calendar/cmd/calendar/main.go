@@ -13,8 +13,7 @@ import (
 	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/logger"
 	internalgrpc "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage/memory"
-	sqlstorage "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage/sql"
+	storagebuilder "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage/builder"
 )
 
 var configFile string
@@ -36,17 +35,7 @@ func main() {
 
 	config := config.NewConfig(configFile)
 
-	var storage app.Storage
-
-	switch config.Storage.DB {
-	case "in-memory":
-		storage = memorystorage.New()
-	case "db":
-		storage = sqlstorage.New(ctx, config.Storage.URL, config.Storage.Timeout)
-	default:
-		storage = memorystorage.New()
-	}
-
+	storage := storagebuilder.New(ctx, config.Storage.DB, config.Storage.URL, config.Storage.Timeout)
 	logg := logger.New(config.Logger.Level, "server")
 	calendar := app.New(logg, storage)
 	httpServer := internalhttp.NewServer(logg, calendar)

@@ -48,8 +48,8 @@ func (s *Storage) CreateEvent(e *storage.Event) error {
 
 	tx := s.db.MustBegin()
 	tx.NamedExec(`INSERT INTO events
-	 (id, title, start_dt, end_dt, description, user_id, notify_before) VALUES
-	 (:id, :title, :start_dt, :end_dt, :description, :user_id, :notify_before)"`, e)
+	 (id, title, start_dt, end_dt, description, user_id, notify_before, notified) VALUES
+	 (:id, :title, :start_dt, :end_dt, :description, :user_id, :notify_before, :notified)"`, e)
 	err := tx.Commit()
 	return err
 }
@@ -107,6 +107,7 @@ func (s *Storage) UpdateEvent(_ string, e *storage.Event) error {
 		description=:description,
 		user_id=:user_id,
 		notify_before=:notify_before
+		notified=:notified
 	) WHERE id=:id`, e)
 	err := tx.Commit()
 	return err
@@ -115,6 +116,37 @@ func (s *Storage) UpdateEvent(_ string, e *storage.Event) error {
 func (s *Storage) DeleteEvent(id string) error {
 	tx := s.db.MustBegin()
 	tx.MustExec(`DELETE FROM events WHERE id=$1`, id)
+	err := tx.Commit()
+	return err
+}
+
+func (s *Storage) GetNotifyEvents(startDt time.Time) ([]*storage.Event, error) {
+	events := make([]*storage.Event, 0)
+	rows, err := s.db.Queryx(`
+	SELECT * FROM events
+	WHERE
+		notified = false AND
+		notify_before != "" AND
+		start_dt - notify_before <= $1
+	`, startDt)
+	if err != nil {
+		return events, err
+	}
+
+	for rows.Next() {
+		event := storage.Event{}
+		err := rows.StructScan(&event)
+		if err != nil {
+			return events, err
+		}
+		events = append(events, &event)
+	}
+	return events, nil
+}
+
+func (s *Storage) DeleteOldEvents(olderThanDt time.Time) error {
+	tx := s.db.MustBegin()
+	tx.MustExec(`DELETE FROM events WHERE end_dt < $1`, olderThanDt)
 	err := tx.Commit()
 	return err
 }

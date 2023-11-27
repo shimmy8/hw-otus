@@ -15,6 +15,8 @@ type Config struct {
 	Storage    StorageConf    `mapstructure:"storage"`
 	HTTPServer HTTPServerConf `mapstructure:"httpserver"`
 	GRPCServer GRPCServerConf `mapstructure:"grpcserver"`
+	AMQPConf   AMQPConf       `mapstructure:"amqp"`
+	Scheduler  SchedulerConf  `mapstructure:"scheduler"`
 }
 
 type LoggerConf struct {
@@ -35,6 +37,19 @@ type HTTPServerConf struct {
 type GRPCServerConf struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
+}
+
+type AMQPConf struct {
+	Host      string `mapstructure:"host"`
+	Port      int    `mapstructure:"port"`
+	Username  string `mapstructure:"username"`
+	Password  string `mapstructure:"password"`
+	QueueName string `mapstructure:"queue_name"`
+}
+
+type SchedulerConf struct {
+	NotifyCheckPeriod int `mapstructure:"notify_check_period_s"`
+	RemoveCheckPeriod int `mapstructure:"remove_check_period_s"`
 }
 
 func NewConfig(fileName string) Config {

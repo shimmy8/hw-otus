@@ -92,3 +92,34 @@ func (s *Storage) DeleteEvent(id string) error {
 	s.events.Delete(id)
 	return nil
 }
+
+func (s *Storage) GetNotifyEvents(startDt time.Time) ([]*storage.Event, error) {
+	events := make([]*storage.Event, 0)
+
+	s.events.Range(func(key, value any) bool {
+		event := value.(*storage.Event)
+
+		if event.Notified {
+			return true
+		}
+
+		if event.StartDT.Add(-1 * event.NotifyBefore).Before(startDt) {
+			events = append(events, event)
+		}
+		return true
+	})
+
+	return events, nil
+}
+
+func (s *Storage) DeleteOldEvents(olderThanDt time.Time) error {
+	s.events.Range(func(key, value any) bool {
+		event := value.(*storage.Event)
+
+		if event.EndDT.Before(olderThanDt) {
+			s.events.Delete(event.ID)
+		}
+		return true
+	})
+	return nil
+}

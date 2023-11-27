@@ -12,3 +12,14 @@ port = 8080
 [grpcserver]
 host = "localhost"
 port = 8002
+
+[amqp]
+host = "localhost"
+port = 5742
+username = "guest"
+password = ""
+queue_name = "events-notify"
+
+[scheduler]
+notify_check_period_s = 60
+remove_check_period_s = 3600

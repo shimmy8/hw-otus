@@ -6,11 +6,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage"
+	storagebuilder "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage/builder"
 )
 
 type App struct {
 	logger  Logger
-	storage Storage
+	storage storagebuilder.Storage
 }
 
 type Logger interface {
@@ -20,15 +21,7 @@ type Logger interface {
 	Error(msg string)
 }
 
-type Storage interface {
-	GetEvent(id string) (*storage.Event, error)
-	GetEventsForInterval(startDt time.Time, endDt time.Time, userID string) ([]*storage.Event, error)
-	CreateEvent(e *storage.Event) error
-	UpdateEvent(id string, e *storage.Event) error
-	DeleteEvent(id string) error
-}
-
-func New(logger Logger, storage Storage) *App {
+func New(logger Logger, storage storagebuilder.Storage) *App {
 	return &App{logger: logger, storage: storage}
 }
 

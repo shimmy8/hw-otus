@@ -19,4 +19,5 @@ type Event struct {
 	Description  string        `db:"description"`
 	UserID       string        `db:"user_id"`
 	NotifyBefore time.Duration `db:"notify_before"`
+	Notified     bool          `db:"notified"`
 }

@@ -7,6 +7,7 @@ require (
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/pressly/goose/v3 v3.16.0
+	github.com/rabbitmq/amqp091-go v1.9.0
 	github.com/spf13/viper v1.17.0
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.59.0

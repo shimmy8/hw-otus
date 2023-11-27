@@ -144,3 +144,43 @@ func TestStorage(t *testing.T) {
 		}
 	})
 }
+
+func TestStorage2(t *testing.T) {
+	t.Run("test get notifiy events", func(t *testing.T) {
+		t.Parallel()
+
+		s := New()
+		now := time.Now()
+
+		evt := createNewEvent("222")
+		evt.StartDT = now.Add(-time.Hour)
+		evt.EndDT = now.Add(-30 * time.Minute)
+		evt.NotifyBefore = time.Minute * 30
+
+		s.CreateEvent(evt)
+
+		events, err := s.GetNotifyEvents(now.Add(time.Minute * -80))
+		require.NoError(t, err)
+
+		require.Equal(t, "222", events[0].ID)
+	})
+
+	t.Run("test delete old events", func(t *testing.T) {
+		t.Parallel()
+
+		s := New()
+		now := time.Now()
+
+		evt := createNewEvent("333")
+		evt.StartDT = now.AddDate(-1, 0, 0)
+		evt.EndDT = now.AddDate(-1, 0, 0)
+
+		s.CreateEvent(evt)
+
+		err := s.DeleteOldEvents(time.Now().AddDate(0, 11, 20))
+		require.NoError(t, err)
+
+		_, getErr := s.GetEvent("333")
+		require.ErrorIs(t, getErr, storage.ErrEventNotFoud)
+	})
+}
