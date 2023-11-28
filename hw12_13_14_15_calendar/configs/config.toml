@@ -2,22 +2,23 @@
 level = "INFO"
 
 [storage]
-db = "in-memory"
+db = "db"
+url = "postgres://calendar:calendar@postgres:5432/calendar"
 timeout = 3
 
 [httpserver]
-host = "localhost"
+host = "0.0.0.0"
 port = 8080
 
 [grpcserver]
-host = "localhost"
+host = "0.0.0.0"
 port = 8002
 
 [amqp]
-host = "localhost"
-port = 5742
+host = "rabbitmq"
+port = 5672
 username = "guest"
-password = ""
+password = "guest"
 queue_name = "events-notify"
 
 [scheduler]

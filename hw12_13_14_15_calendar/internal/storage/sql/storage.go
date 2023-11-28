@@ -126,7 +126,7 @@ func (s *Storage) GetNotifyEvents(startDt time.Time) ([]*storage.Event, error) {
 	SELECT * FROM events
 	WHERE
 		notified = false AND
-		notify_before != "" AND
+		notify_before != NULL AND
 		start_dt - notify_before <= $1
 	`, startDt)
 	if err != nil {

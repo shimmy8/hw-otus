@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 	"os/signal"
 	"syscall"
 
@@ -37,8 +38,12 @@ func main() {
 
 	if err := rabbitmq.Connect(); err != nil {
 		logg.Error(fmt.Sprintf("failed to connect to rabbitmq %v", err))
+		cancel()
+		os.Exit(1) //nolint:gocritic
 	}
 	defer rabbitmq.Close()
+
+	logg.Info("sender started")
 
 	rabbitmq.Consume(ctx, func(msg *internalqueue.Message) {
 		logg.Info(fmt.Sprintf("Message received %v", msg))

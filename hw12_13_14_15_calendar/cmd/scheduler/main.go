@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -40,6 +41,8 @@ func main() {
 
 	if err := rabbitmq.Connect(); err != nil {
 		logg.Error(fmt.Sprintf("failed to connect to rabbitmq %v", err))
+		rabbitmq.Close()
+		os.Exit(1) //nolint:gocritic
 	}
 	defer rabbitmq.Close()
 
@@ -48,6 +51,8 @@ func main() {
 
 	removePeriod := time.Second * (time.Duration(config.Scheduler.RemoveCheckPeriod))
 	go removeOldNotifications(ctx, removePeriod, storage, logg)
+
+	logg.Info("scheduler started")
 
 	<-ctx.Done()
 }
@@ -71,6 +76,8 @@ func sendNotifications(
 				logger.Error(fmt.Sprintf("failed to get events %v", err))
 				continue
 			}
+
+			logger.Info(fmt.Sprintf("%d events found", len(events)))
 
 			for _, evt := range events {
 				msg := &internalqueue.Message{

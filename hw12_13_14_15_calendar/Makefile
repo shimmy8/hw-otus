@@ -44,4 +44,13 @@ install-protoc:
 generate:
 	protoc api/EventService.proto --go_out=./internal/server/grpc/gen --go-grpc_out=./internal/server/grpc/gen
 
+migrate:
+	docker compose up -d --build migrations
+
+up: 
+	docker compose up -d --build migrations calendar scheduler sender
+
+down:
+	docker compose down
+
 .PHONY: build run build-img run-img version test lint
