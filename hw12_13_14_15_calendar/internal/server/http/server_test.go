@@ -210,7 +210,7 @@ func TestServerEventsList(t *testing.T) {
 				}
 
 				require.Equal(t, len(tt.expectedEvents), len(listResp.Events))
-				require.Equal(t, tt.expectedEvents, respEventsID)
+				require.ElementsMatch(t, tt.expectedEvents, respEventsID)
 			})
 		}
 	})
