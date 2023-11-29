@@ -11,6 +11,7 @@ import (
 	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/config"
 	"github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/logger"
 	internalqueue "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/queue"
+	storagebuilder "github.com/shimmy8/hw-otus/hw12_13_14_15_calendar/internal/storage/builder"
 )
 
 var configFile string
@@ -26,6 +27,7 @@ func main() {
 	defer cancel()
 
 	config := config.NewConfig(configFile)
+	storage := storagebuilder.New(ctx, config.Storage.DB, config.Storage.URL, config.Storage.Timeout)
 	logg := logger.New(config.Logger.Level, "sender")
 
 	rabbitmq := internalqueue.New(
@@ -47,5 +49,16 @@ func main() {
 
 	rabbitmq.Consume(ctx, func(msg *internalqueue.Message) {
 		logg.Info(fmt.Sprintf("Message received %v", msg))
+
+		event, err := storage.GetEvent(msg.EventID)
+		if err != nil {
+			logg.Error(fmt.Sprintf("Error while getting event from storage %v", err))
+		}
+
+		event.Notified = true
+		updErr := storage.UpdateEvent(msg.EventID, event)
+		if updErr != nil {
+			logg.Error(fmt.Sprintf("Error while setting event notified %v", updErr))
+		}
 	})
 }

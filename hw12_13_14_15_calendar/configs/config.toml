@@ -22,5 +22,5 @@ password = "guest"
 queue_name = "events-notify"
 
 [scheduler]
-notify_check_period_s = 60
-remove_check_period_s = 3600
+notify_check_period_s = 10
+remove_check_period_s = 600

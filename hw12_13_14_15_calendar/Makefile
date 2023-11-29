@@ -53,4 +53,10 @@ up:
 down:
 	docker compose down
 
-.PHONY: build run build-img run-img version test lint
+run-integration-test:
+	go test ./tests/...
+
+integration-tests: up run-integration-test down
+
+
+.PHONY: build run build-img run-img version test lint integration-tests

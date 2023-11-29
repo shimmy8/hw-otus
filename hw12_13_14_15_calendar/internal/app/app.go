@@ -51,6 +51,11 @@ func (a *App) CreateEvent(
 	return event, nil
 }
 
+func (a *App) GetEvent(_ context.Context, eventID string) (*storage.Event, error) {
+	event, err := a.storage.GetEvent(eventID)
+	return event, err
+}
+
 func (a *App) UpdateEvent(
 	_ context.Context,
 	eventID string,

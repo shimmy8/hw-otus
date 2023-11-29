@@ -6,7 +6,7 @@ import (
 	"os"
 
 	// use pgx as driver.
-	_ "github.com/jackc/pgx/stdlib"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 )
 

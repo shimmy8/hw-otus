@@ -92,12 +92,6 @@ func sendNotifications(
 					continue
 				}
 
-				evt.Notified = true
-				if err := storage.UpdateEvent(evt.ID, evt); err != nil {
-					logger.Error(fmt.Sprintf("failed to update event %v", err))
-					continue
-				}
-
 				logger.Info(fmt.Sprintf("notification published %v", evt))
 			}
 		}
