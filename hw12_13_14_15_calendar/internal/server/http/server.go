@@ -3,6 +3,7 @@ package internalhttp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -33,6 +34,7 @@ func (s *Server) Start(ctx context.Context, host string, port int) error {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/hello", s.Hello)
+	mux.HandleFunc("/events", s.GetEvent)
 	mux.HandleFunc("/events/create", s.CreateEvent)
 	mux.HandleFunc("/events/update", s.UpdateEvent)
 	mux.HandleFunc("/events/delete", s.DeleteEvent)
@@ -67,29 +69,57 @@ func (s *Server) Hello(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte("hello-world"))
 }
 
+func (s *Server) GetEvent(w http.ResponseWriter, r *http.Request) {
+	eventID := r.URL.Query().Get("id")
+
+	event, err := s.app.GetEvent(r.Context(), eventID)
+	if err != nil {
+		s.logger.Info(fmt.Sprintf("get event error %v", err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp := &ReplyEvent{
+		ID:           event.ID,
+		Title:        event.Title,
+		StartDT:      event.StartDT,
+		EndDT:        event.EndDT,
+		Description:  event.Description,
+		UserID:       event.UserID,
+		NotifyBefore: event.NotifyBefore,
+		Notified:     event.Notified,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
 func (s *Server) CreateEvent(w http.ResponseWriter, r *http.Request) {
 	rqEvent := CreateEventRequest{}
 
 	err := parseRequestBody(r, &rqEvent)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("parse request body error %v", err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	startDt, err := time.Parse(time.DateTime, rqEvent.StartDT)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("parse request startDT error %v, body: %v", err, rqEvent))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	endDt, err := time.Parse(time.DateTime, rqEvent.EndDT)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("parse request endDT error %v, body: %v", err, rqEvent))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	notifyBefore, err := time.ParseDuration(rqEvent.NotifyBefore)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("parse request notifyBefore error %v, body: %v", err, rqEvent))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -105,6 +135,7 @@ func (s *Server) CreateEvent(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.logger.Info(fmt.Sprintf("create event error %v, body: %v", err, rqEvent))
 		return
 	}
 
@@ -118,24 +149,28 @@ func (s *Server) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 
 	err := parseRequestBody(r, &rqEvent)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("parse request body error %v", err))
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	startDt, err := time.Parse(time.DateTime, rqEvent.StartDT)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("parse request startDT error %v, body: %v", err, rqEvent))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	endDt, err := time.Parse(time.DateTime, rqEvent.EndDT)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("parse request endDT error %v, body: %v", err, rqEvent))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	notifyBefore, err := time.ParseDuration(rqEvent.NotifyBefore)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("parse request notifyBefore error %v, body: %v", err, rqEvent))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -151,6 +186,7 @@ func (s *Server) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		notifyBefore,
 	)
 	if updErr != nil {
+		s.logger.Info(fmt.Sprintf("update event error %v, body: %v", err, rqEvent))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -165,18 +201,21 @@ func (s *Server) DeleteEvent(w http.ResponseWriter, r *http.Request) {
 
 	err := parseRequestBody(r, &rqEvent)
 	if err != nil {
+		s.logger.Info(fmt.Sprintf("parse delete body error %v, body: %v", err, rqEvent))
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	delErr := s.app.DeleteEvent(r.Context(), rqEvent.ID)
 	if delErr != nil {
+		s.logger.Info(fmt.Sprintf("delete event error %v", delErr))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	rep := DeleteEventReply{Ok: true}
 	json.NewEncoder(w).Encode(rep)
+	w.WriteHeader(http.StatusOK)
 }
 
 const (
@@ -235,6 +274,7 @@ func (s *Server) listEvents(w http.ResponseWriter, r *http.Request, period strin
 			Description:  evt.Description,
 			UserID:       evt.UserID,
 			NotifyBefore: evt.NotifyBefore,
+			Notified:     evt.Notified,
 		}
 	}
 

@@ -54,4 +54,5 @@ type ReplyEvent struct {
 	Description  string        `json:"description"`
 	UserID       string        `json:"user_id"`       //nolint:tagliatelle
 	NotifyBefore time.Duration `json:"notify_before"` //nolint:tagliatelle
+	Notified     bool          `json:"notified"`      //nolint:tagliatelle
 }
